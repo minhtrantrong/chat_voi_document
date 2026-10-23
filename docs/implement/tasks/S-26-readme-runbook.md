@@ -63,8 +63,9 @@ Streamlit → SQLite (metadata) + local disk (PDF) + Qdrant (vector)
 
 - Python 3.12+
 - Docker + Docker Compose
-- API key OpenAI-compatible **hoặc** Ollama local
-- RAM/disk gợi ý: 2 GB RAM, 500 MB disk cho demo
+- **Ollama local (mặc định)**, hoặc API key OpenAI-compatible
+- RAM/disk: `llama3.1` + `nomic-embed-text` cần khoảng 8 GB RAM, 5–6 GB disk;
+  dùng API cloud khoảng 2 GB RAM, 500 MB disk
 
 ### 4.4 Quickstart
 
@@ -72,11 +73,14 @@ Streamlit → SQLite (metadata) + local disk (PDF) + Qdrant (vector)
 git clone <repo>
 cd chat_voi_document
 
+ollama pull llama3.1
+ollama pull nomic-embed-text
+
 cp .env.example .env
-# sửa OPENAI_API_KEY, LLM_MODEL, EMBEDDING_MODEL, EMBEDDING_DIM
+# mặc định đã là Ollama; chỉ sửa nếu dùng model/endpoint khác
 
 docker compose up -d
-uv sync                      # hoặc: python -m venv .venv && pip install -e ".[dev]"
+uv sync --extra dev           # hoặc: python -m venv .venv && pip install -e ".[dev]"
 
 uv run streamlit run app/main.py
 # mở http://localhost:8501
@@ -106,7 +110,8 @@ EMBEDDING_MODEL=nomic-embed-text
 EMBEDDING_DIM=768
 ```
 
-> Nếu đổi từ OpenAI 1536 sang Ollama 768: xoá collection Qdrant cũ trước khi chạy.
+> Mặc định dùng Ollama 768 chiều; nếu đổi model/chiều vector (ví dụ sang OpenAI
+> 1536), xoá collection Qdrant cũ trước khi chạy và re-index.
 
 ### 4.7 Sử dụng
 

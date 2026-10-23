@@ -181,12 +181,12 @@ QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY=
 QDRANT_COLLECTION=document_chunks
 
-# LLM / Embedding (OpenAI-compatible)
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
-EMBEDDING_MODEL=text-embedding-3-small
-EMBEDDING_DIM=1536
+# LLM / Embedding (mặc định: Ollama local)
+OPENAI_BASE_URL=http://localhost:11434/v1
+OPENAI_API_KEY=ollama
+LLM_MODEL=llama3.1
+EMBEDDING_MODEL=nomic-embed-text
+EMBEDDING_DIM=768
 
 # Giới hạn
 MAX_UPLOAD_MB=25
@@ -206,14 +206,14 @@ MAX_CONTEXT_CHARS=24000
 DATA_DIR=./data
 ```
 
-**Ví dụ dùng Ollama local:**
+**Ví dụ dùng OpenAI (tuỳ chọn):**
 
 ```env
-OPENAI_BASE_URL=http://localhost:11434/v1
-OPENAI_API_KEY=ollama
-LLM_MODEL=llama3.1
-EMBEDDING_MODEL=nomic-embed-text
-EMBEDDING_DIM=768
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-...
+LLM_MODEL=gpt-4o-mini
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIM=1536
 ```
 
 > **Lưu ý:** `EMBEDDING_DIM` phải khớp với model. Nếu đổi model/chiều vector, phải xoá và tạo lại collection Qdrant, sau đó re-index toàn bộ PDF.

@@ -1,0 +1,416 @@
+[
+  {
+    "id": "in-01",
+    "type": "in_doc",
+    "question": "Hạn chót nộp hồ sơ là ngày nào?",
+    "expected_docs": [
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "30/11/2026"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-02",
+    "type": "in_doc",
+    "question": "Giá trị hợp đồng là bao nhiêu?",
+    "expected_docs": [
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "1.200.000.000"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-03",
+    "type": "in_doc",
+    "question": "Bên A là công ty nào?",
+    "expected_docs": [
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "Minh Phát"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-04",
+    "type": "in_doc",
+    "question": "Thời hạn hợp đồng là bao lâu?",
+    "expected_docs": [
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "12 tháng"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-05",
+    "type": "in_doc",
+    "question": "Thời gian bảo hành là bao lâu?",
+    "expected_docs": [
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "24 tháng"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-06",
+    "type": "in_doc",
+    "question": "Gói A có giá bao nhiêu?",
+    "expected_docs": [
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "450.000.000"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-07",
+    "type": "in_doc",
+    "question": "Gói B giao hàng trong bao lâu?",
+    "expected_docs": [
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "60 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-08",
+    "type": "in_doc",
+    "question": "Báo giá có hiệu lực bao lâu?",
+    "expected_docs": [
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "30 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-09",
+    "type": "in_doc",
+    "question": "Mật khẩu tối thiểu bao nhiêu ký tự?",
+    "expected_docs": [
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "12 ký tự"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "in-10",
+    "type": "in_doc",
+    "question": "Log được lưu trong bao lâu?",
+    "expected_docs": [
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [
+      1
+    ],
+    "must_contain": [
+      "90 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-01",
+    "type": "multi_doc",
+    "question": "So sánh thời gian giao hàng gói A và thời hạn hợp đồng.",
+    "expected_docs": [
+      "bao-gia.pdf",
+      "hop-dong.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "45 ngày",
+      "12 tháng"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-02",
+    "type": "multi_doc",
+    "question": "Tổng giá trị hợp đồng và giá gói B là bao nhiêu?",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "1.200.000.000",
+      "620.000.000"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-03",
+    "type": "multi_doc",
+    "question": "Bên A là ai và log được lưu bao lâu?",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "Minh Phát",
+      "90 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-04",
+    "type": "multi_doc",
+    "question": "Bảo hành bao lâu và dữ liệu được sao lưu thế nào?",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "24 tháng",
+      "30 bản"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-05",
+    "type": "multi_doc",
+    "question": "Gói A giao trong bao lâu và RTO là bao nhiêu?",
+    "expected_docs": [
+      "bao-gia.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "45 ngày",
+      "4 giờ"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-06",
+    "type": "multi_doc",
+    "question": "Hiệu lực báo giá và yêu cầu mật khẩu là gì?",
+    "expected_docs": [
+      "bao-gia.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "30 ngày",
+      "12 ký tự"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-07",
+    "type": "multi_doc",
+    "question": "So sánh thời hạn hợp đồng và hiệu lực báo giá.",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "12 tháng",
+      "30 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-08",
+    "type": "multi_doc",
+    "question": "Bên B là ai và gói B giá bao nhiêu?",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "bao-gia.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "Đông Á",
+      "620.000.000"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-09",
+    "type": "multi_doc",
+    "question": "Gói B giao bao lâu và log lưu bao lâu?",
+    "expected_docs": [
+      "bao-gia.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "60 ngày",
+      "90 ngày"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "multi-10",
+    "type": "multi_doc",
+    "question": "Bảo hành bao lâu và RTO là bao nhiêu?",
+    "expected_docs": [
+      "hop-dong.pdf",
+      "quy-dinh.pdf"
+    ],
+    "expected_pages": [],
+    "must_contain": [
+      "24 tháng",
+      "4 giờ"
+    ],
+    "must_not_contain": []
+  },
+  {
+    "id": "out-01",
+    "type": "out_of_scope",
+    "question": "Giá cổ phiếu VNM hôm nay là bao nhiêu?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "VNM",
+      "cổ phiếu"
+    ]
+  },
+  {
+    "id": "out-02",
+    "type": "out_of_scope",
+    "question": "Thủ đô nước Pháp là gì?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "Paris"
+    ]
+  },
+  {
+    "id": "out-03",
+    "type": "out_of_scope",
+    "question": "Thời tiết Hà Nội ngày mai thế nào?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "nắng",
+      "mưa"
+    ]
+  },
+  {
+    "id": "out-04",
+    "type": "out_of_scope",
+    "question": "Tổng thống Mỹ hiện tại là ai?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "Trump",
+      "Biden"
+    ]
+  },
+  {
+    "id": "out-05",
+    "type": "out_of_scope",
+    "question": "Cách nấu phở bò?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "nước dùng",
+      "xương"
+    ]
+  },
+  {
+    "id": "out-06",
+    "type": "out_of_scope",
+    "question": "Giá vàng SJC hôm nay?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "SJC"
+    ]
+  },
+  {
+    "id": "out-07",
+    "type": "out_of_scope",
+    "question": "Đội nào vô địch World Cup 2022?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "Argentina"
+    ]
+  },
+  {
+    "id": "out-08",
+    "type": "out_of_scope",
+    "question": "Bitcoin hôm nay bao nhiêu?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "USD"
+    ]
+  },
+  {
+    "id": "out-09",
+    "type": "out_of_scope",
+    "question": "Dân số Việt Nam năm 2026?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "triệu người"
+    ]
+  },
+  {
+    "id": "out-10",
+    "type": "out_of_scope",
+    "question": "Ai phát minh ra điện thoại?",
+    "expected_docs": [],
+    "expected_pages": [],
+    "must_contain": [],
+    "must_not_contain": [
+      "Bell"
+    ]
+  }
+]

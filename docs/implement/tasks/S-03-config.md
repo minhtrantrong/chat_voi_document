@@ -54,12 +54,12 @@ class Settings(BaseSettings):
     qdrant_api_key: str = ""
     qdrant_collection: str = "document_chunks"
 
-    # LLM / Embedding
-    openai_base_url: str = "https://api.openai.com/v1"
-    openai_api_key: str = Field(default="", repr=False)
-    llm_model: str = "gpt-4o-mini"
-    embedding_model: str = "text-embedding-3-small"
-    embedding_dim: int = 1536
+    # LLM / Embedding (mặc định: Ollama local)
+    openai_base_url: str = "http://localhost:11434/v1"
+    openai_api_key: str = Field(default="ollama", repr=False)
+    llm_model: str = "llama3.1"
+    embedding_model: str = "nomic-embed-text"
+    embedding_dim: int = 768
 
     # Upload / chunk
     max_upload_mb: int = 25
@@ -117,11 +117,11 @@ def get_settings() -> Settings:
 | `QDRANT_URL` | `http://localhost:6333` | |
 | `QDRANT_API_KEY` | rỗng | Qdrant local không cần |
 | `QDRANT_COLLECTION` | `document_chunks` | |
-| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | đổi sang Ollama/vLLM nếu cần |
-| `OPENAI_API_KEY` | rỗng | **bắt buộc khi gọi API**; không log |
-| `LLM_MODEL` | `gpt-4o-mini` | |
-| `EMBEDDING_MODEL` | `text-embedding-3-small` | |
-| `EMBEDDING_DIM` | `1536` | phải khớp model |
+| `OPENAI_BASE_URL` | `http://localhost:11434/v1` | Ollama mặc định; đổi sang OpenAI/vLLM nếu cần |
+| `OPENAI_API_KEY` | `ollama` | Ollama không cần key thật; OpenAI dùng key thật; không log |
+| `LLM_MODEL` | `llama3.1` | |
+| `EMBEDDING_MODEL` | `nomic-embed-text` | |
+| `EMBEDDING_DIM` | `768` | phải khớp model |
 | `MAX_UPLOAD_MB` | `25` | |
 | `MAX_PAGES` | `400` | |
 | `MIN_TEXT_CHARS_PER_PAGE` | `20` | dùng phát hiện scan |
@@ -140,9 +140,10 @@ Không cần fail-fast lúc import (để test dễ). Tạo helper:
 
 ```python
 def require_api_key(s: Settings) -> None:
-    if not s.openai_api_key:
+    if not s.openai_api_key.strip():
         raise RuntimeError(
-            "Thiếu OPENAI_API_KEY. Sao chép .env.example thành .env và điền key."
+            "Thiếu OPENAI_API_KEY. Với Ollama, dùng giá trị giả `ollama`; "
+            "với OpenAI, sao chép .env.example thành .env và điền key."
         )
 ```
 
@@ -150,7 +151,7 @@ Gọi helper này trong `embeddings.py` và `rag.py` trước khi gọi API. UI 
 
 ## 5. Trường hợp biên
 
-- `.env` không tồn tại → dùng default; API key rỗng sẽ báo khi gọi AI.
+- `.env` không tồn tại → dùng default Ollama (`OPENAI_API_KEY=ollama`); nếu dùng OpenAI mà key rỗng thì báo khi gọi AI.
 - Biến môi trường sai kiểu (`MAX_UPLOAD_MB=abc`) → pydantic báo lỗi rõ.
 - `DATA_DIR` là file → `mkdir` lỗi; thông báo rõ.
 - `EMBEDDING_DIM` đổi nhưng Qdrant collection cũ → S-05 báo mismatch.
