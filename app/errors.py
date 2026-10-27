@@ -21,7 +21,7 @@ ERROR_MESSAGES: dict[str, str] = {
     "QDRANT_UNAVAILABLE": ("Cơ sở dữ liệu vector chưa sẵn sàng. Kiểm tra Qdrant đang chạy."),
     "LLM_FAILED": "Trợ lý tạm thời không trả lời được. Thử lại sau.",
     "CONFIG_MISSING": (
-        "Chưa cấu hình API key hoặc mô hình AI. Với Ollama, dùng OPENAI_API_KEY=ollama."
+        "Chưa cấu hình API key hoặc mô hình AI. Với LM Studio, dùng OPENAI_API_KEY=lm-studio."
     ),
     "INGEST_FAILED": "Không xử lý được tài liệu. Thử lại hoặc xoá tệp.",
     "INTERNAL": "Đã xảy ra lỗi. Thử lại; nếu vẫn lỗi, kiểm tra log.",

@@ -23,12 +23,12 @@ class Settings(BaseSettings):
     qdrant_collection: str = "document_chunks"
     qdrant_timeout: int = 10
 
-    # LLM / Embedding (mặc định: Ollama local, OpenAI-compatible)
-    openai_base_url: str = "http://localhost:11434/v1"
-    openai_api_key: str = Field(default="ollama", repr=False)
-    llm_model: str = "llama3.1"
+    # LLM / Embedding (mặc định: LM Studio local, OpenAI-compatible)
+    openai_base_url: str = "http://localhost:1234/v1"
+    openai_api_key: str = Field(default="lm-studio", repr=False)
+    llm_model: str = "qwen/qwen3-1.7b"
     llm_temperature: float = 0.1
-    embedding_model: str = "nomic-embed-text"
+    embedding_model: str = "text-embedding-nomic-embed-text-v1.5"
     embedding_dim: int = 768
     embedding_batch_size: int = 64
 
@@ -95,6 +95,6 @@ def get_settings() -> Settings:
 def require_api_key(settings: Settings) -> None:
     if not settings.openai_api_key.strip():
         raise RuntimeError(
-            "Thiếu OPENAI_API_KEY. Với Ollama, dùng giá trị giả `ollama`; "
+            "Thiếu OPENAI_API_KEY. Với LM Studio/Ollama, dùng giá trị giả (vd. `lm-studio`); "
             "với OpenAI, sao chép `.env.example` thành `.env` và điền key."
         )

@@ -10,15 +10,15 @@ Streamlit (1 trang)
 ├── SQLite          → metadata tài liệu
 ├── Local disk      → PDF gốc (data/uploads/)
 ├── Qdrant          → vector + payload chunk
-└── Ollama (mặc định) / API OpenAI-compatible → embedding + chat
+└── LM Studio (mặc định) / Ollama / API OpenAI-compatible → embedding + chat
 ```
 
 ## Yêu cầu
 
 - Python 3.12+
 - Docker + Docker Compose
-- **Ollama local (mặc định)**, hoặc API key OpenAI-compatible
-- Tài nguyên: `qwen3:1.7b` + `nomic-embed-text` cần khoảng 4 GB RAM và 5–6 GB disk;
+- **LM Studio local (mặc định)**, Ollama, hoặc API key OpenAI-compatible
+- Tài nguyên: `qwen3-1.7b` + `nomic-embed-text` cần khoảng 4 GB RAM và 5–6 GB disk;
   nếu dùng API cloud chỉ cần khoảng 2 GB RAM, 500 MB disk
 
 ## Quickstart
@@ -27,10 +27,11 @@ Streamlit (1 trang)
 git clone <repo>
 cd chat_voi_document
 
-# 1. Ollama (mặc định)
-ollama pull qwen3:1.7b
-ollama pull nomic-embed-text
-# đảm bảo Ollama đang chạy: ollama serve
+# 1. LM Studio (mặc định): tải model qwen/qwen3-1.7b và
+#    text-embedding-nomic-embed-text-v1.5, rồi bật server
+lms get qwen/qwen3-1.7b
+lms get nomic-ai/nomic-embed-text-v1.5
+lms server start   # mặc định cổng 1234 (hoặc tab Developer → Start Server)
 
 # 2. Tạo môi trường (chọn một)
 python3 -m venv .venv
@@ -38,7 +39,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 # hoặc: uv sync --extra dev
 
-# 3. Cấu hình (mặc định đã là Ollama; chỉ sửa nếu cần)
+# 3. Cấu hình (mặc định đã là LM Studio; chỉ sửa nếu cần)
 cp .env.example .env
 
 # 4. Qdrant (image ghim: qdrant/qdrant:v1.20.0)
@@ -58,10 +59,10 @@ Các biến chính trong `.env` (xem đầy đủ ở `.env.example`):
 |---|---|---|
 | `QDRANT_URL` | `http://localhost:6333` | |
 | `QDRANT_COLLECTION` | `document_chunks` | |
-| `OPENAI_BASE_URL` | `http://localhost:11434/v1` | Ollama mặc định; đổi sang OpenAI/vLLM nếu cần |
-| `OPENAI_API_KEY` | `ollama` | Ollama không cần key thật; dùng giá trị giả này |
-| `LLM_MODEL` | `llama3.1` | |
-| `EMBEDDING_MODEL` | `nomic-embed-text` | |
+| `OPENAI_BASE_URL` | `http://localhost:1234/v1` | LM Studio mặc định; đổi sang Ollama/OpenAI/vLLM nếu cần |
+| `OPENAI_API_KEY` | `lm-studio` | LM Studio không cần key thật; dùng giá trị giả này |
+| `LLM_MODEL` | `qwen/qwen3-1.7b` | Phải khớp identifier trong LM Studio |
+| `EMBEDDING_MODEL` | `text-embedding-nomic-embed-text-v1.5` | Phải khớp identifier trong LM Studio |
 | `EMBEDDING_DIM` | `768` | **phải khớp model** |
 | `MAX_UPLOAD_MB` | `25` | |
 | `MAX_PAGES` | `400` | |
@@ -71,7 +72,26 @@ Các biến chính trong `.env` (xem đầy đủ ở `.env.example`):
 
 > Đổi embedding model/chiều vector → xoá collection Qdrant cũ và re-index toàn bộ PDF.
 
-### Mặc định: Ollama
+### Mặc định: LM Studio
+
+Trong LM Studio: tải một model chat và một model embedding, vào tab **Developer**
+→ **Start Server** (cổng `1234`). Có thể bật *Just-in-Time model loading* để
+server tự nạp model khi có request.
+
+```env
+OPENAI_BASE_URL=http://localhost:1234/v1
+OPENAI_API_KEY=lm-studio
+LLM_MODEL=qwen/qwen3-1.7b
+EMBEDDING_MODEL=text-embedding-nomic-embed-text-v1.5
+EMBEDDING_DIM=768
+```
+
+LM Studio không cần API key thật; giá trị `lm-studio` chỉ để thỏa mãn client
+OpenAI-compatible. `LLM_MODEL`/`EMBEDDING_MODEL` phải đúng identifier hiển thị
+trong LM Studio (xem `curl http://localhost:1234/v1/models`). Chọn model
+chat/embedding hỗ trợ tiếng Việt tốt nếu tài liệu chủ yếu là tiếng Việt.
+
+### Tuỳ chọn: Ollama
 
 ```bash
 ollama pull llama3.1
@@ -86,10 +106,6 @@ EMBEDDING_MODEL=nomic-embed-text
 EMBEDDING_DIM=768
 ```
 
-Ollama không cần API key thật; giá trị `ollama` chỉ để thỏa mãn client
-OpenAI-compatible. Chọn model chat/embedding hỗ trợ tiếng Việt tốt nếu tài liệu
-chủ yếu là tiếng Việt.
-
 ### Tuỳ chọn: OpenAI
 
 ```env
@@ -100,7 +116,7 @@ EMBEDDING_MODEL=text-embedding-3-small
 EMBEDDING_DIM=1536
 ```
 
-Nếu đổi model/chiều vector (ví dụ Ollama 768 sang OpenAI 1536), xoá collection
+Nếu đổi model/chiều vector (ví dụ LM Studio 768 sang OpenAI 1536), xoá collection
 Qdrant cũ trước khi chạy và re-index toàn bộ PDF.
 
 ## Sử dụng
@@ -134,7 +150,7 @@ pytest --cov=app                  # coverage (bỏ qua main.py/shared cũ)
 
 # Eval: tạo PDF mẫu rồi nạp + chấm 30 câu
 .venv/bin/python tests/eval/generate_fixtures.py
-python -m app.eval --reindex --out eval_report  # cần Ollama/API + Qdrant
+python -m app.eval --reindex --out eval_report  # cần LM Studio/API + Qdrant
 ```
 
 ## Troubleshooting
@@ -142,11 +158,12 @@ python -m app.eval --reindex --out eval_report  # cần Ollama/API + Qdrant
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 |---|---|---|
 | `Connection refused` Qdrant | Qdrant chưa chạy | `docker compose up -d`, `docker compose ps` |
-| `Connection refused` cổng `11434` | Ollama chưa chạy | Chạy `ollama serve` |
-| `model ... not found` | Chưa pull model Ollama | `ollama pull llama3.1`, `ollama pull nomic-embed-text` |
+| `Connection refused` cổng `1234` | LM Studio server chưa chạy | Tab Developer → Start Server, hoặc `lms server start` |
+| `model ... not found` | Chưa tải/nạp model hoặc sai identifier | Kiểm tra `curl http://localhost:1234/v1/models`, chỉnh `LLM_MODEL`/`EMBEDDING_MODEL` |
+| `Connection refused` cổng `11434` | (Nếu dùng Ollama) Ollama chưa chạy | Chạy `ollama serve` |
 | `collection ... vector size ...` | Đổi model/dim | Xoá collection cũ, re-index; hoặc đặt đúng `EMBEDDING_DIM` |
 | `401 Unauthorized` | Sai/thiếu API key | Kiểm tra `.env`, không có khoảng trắng |
-| `429 Rate limit` | Quá nhiều request | Giảm batch/top-k, thử lại, dùng Ollama |
+| `429 Rate limit` | Quá nhiều request | Giảm batch/top-k, thử lại, dùng LM Studio/Ollama local |
 | `PDF_NO_TEXT` | PDF scan/ảnh | Chưa hỗ trợ OCR; dùng PDF có text |
 | `PDF_ENCRYPTED` | PDF có mật khẩu | Bỏ mật khẩu rồi tải lại |
 | Upload lâu | Xử lý đồng bộ | Giảm file/trang; xem terminal |

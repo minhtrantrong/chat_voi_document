@@ -14,7 +14,7 @@ def test_settings_creates_directories(settings):
     assert settings.max_upload_bytes == settings.max_upload_mb * 1024 * 1024
 
 
-def test_defaults_use_ollama_and_small_embedding(tmp_path, monkeypatch):
+def test_defaults_use_lm_studio_and_small_embedding(tmp_path, monkeypatch):
     for key in (
         "OPENAI_BASE_URL",
         "OPENAI_API_KEY",
@@ -24,10 +24,10 @@ def test_defaults_use_ollama_and_small_embedding(tmp_path, monkeypatch):
     ):
         monkeypatch.delenv(key, raising=False)
     value = Settings(data_dir=tmp_path / "data", _env_file=None)
-    assert value.openai_base_url == "http://localhost:11434/v1"
-    assert value.openai_api_key == "ollama"
-    assert value.llm_model == "llama3.1"
-    assert value.embedding_model == "nomic-embed-text"
+    assert value.openai_base_url == "http://localhost:1234/v1"
+    assert value.openai_api_key == "lm-studio"
+    assert value.llm_model == "qwen/qwen3-1.7b"
+    assert value.embedding_model == "text-embedding-nomic-embed-text-v1.5"
     assert value.embedding_dim == 768
 
 
