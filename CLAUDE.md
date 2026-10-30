@@ -15,7 +15,7 @@ Single-page Streamlit app: upload PDFs, ask an LLM about them (RAG), see sources
 
 ```bash
 pip install -e ".[dev]"            # or: uv sync --extra dev
-docker compose up -d               # Qdrant (pinned qdrant/qdrant:v1.20.0); health: curl -f http://localhost:6333/healthz
+# Qdrant chạy như system service (không dùng Docker); health: curl -f http://localhost:6333/healthz
 streamlit run app/main.py          # http://localhost:8501
 
 pytest -q                          # all tests (integration tests auto-skip if Qdrant is down)

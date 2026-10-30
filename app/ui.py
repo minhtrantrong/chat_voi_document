@@ -22,6 +22,26 @@ STATUS_EMOJI: dict[str, str] = {
 }
 
 
+STAGE_LABELS: dict[str, str] = {
+    "pending": "Đang chờ",
+    "validating": "Đang kiểm tra tệp",
+    "saving": "Đang lưu tệp",
+    "extracting": "Đang đọc văn bản",
+    "chunking": "Đang chia đoạn",
+    "embedding": "Đang tạo embedding",
+    "indexing": "Đang lập chỉ mục",
+    "done": "Xong",
+}
+
+
+def ingest_stage_text(file_name: str, stage: str, percent: int | None = None) -> str:
+    """Dòng trạng thái xử lý theo từng tệp, vd. '⏳ **a.pdf** — Đang đọc văn bản (15%)'."""
+    emoji = STATUS_EMOJI[DocumentStatus.READY if stage == "done" else DocumentStatus.PROCESSING]
+    label = STAGE_LABELS.get(stage, STATUS_LABELS[DocumentStatus.PROCESSING])
+    suffix = f" ({percent}%)" if percent is not None and stage not in ("pending", "done") else ""
+    return f"{emoji} **{md_escape(file_name)}** — {label}{suffix}"
+
+
 def md_escape(text: str) -> str:
     """Escape ký tự Markdown khi chèn tên tệp do người dùng đặt."""
     for char in "\\`*_{}[]()#+-.!|":

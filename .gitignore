@@ -15,3 +15,4 @@ eval_report.json
 eval_report.md
 tests/eval/fixtures/*.pdf
 .DS_Store
+.kilo/

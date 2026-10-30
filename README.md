@@ -16,7 +16,7 @@ Streamlit (1 trang)
 ## Yêu cầu
 
 - Python 3.12+
-- Docker + Docker Compose
+- Qdrant v1.20.0 chạy như system service (binary từ https://github.com/qdrant/qdrant/releases)
 - **LM Studio local (mặc định)**, Ollama, hoặc API key OpenAI-compatible
 - Tài nguyên: `qwen3-1.7b` + `nomic-embed-text` cần khoảng 4 GB RAM và 5–6 GB disk;
   nếu dùng API cloud chỉ cần khoảng 2 GB RAM, 500 MB disk
@@ -42,8 +42,8 @@ pip install -e ".[dev]"
 # 3. Cấu hình (mặc định đã là LM Studio; chỉ sửa nếu cần)
 cp .env.example .env
 
-# 4. Qdrant (image ghim: qdrant/qdrant:v1.20.0)
-docker compose up -d
+# 4. Qdrant: cài binary v1.20.0 và chạy như system service
+#    (Linux: systemd unit; Windows: NSSM/Task Scheduler), lưu dữ liệu ở thư mục riêng
 curl -f http://localhost:6333/healthz
 
 # 5. Chạy app
@@ -135,9 +135,8 @@ data/
 └── uploads/        # PDF gốc
 ```
 
-- Backup: copy `data/` + Qdrant volume.
-- `docker compose down` giữ volume.
-- `docker compose down -v` **xoá vector** — cẩn thận.
+- Backup: copy `data/` + thư mục storage của Qdrant (dừng service trước khi copy).
+- Xoá thư mục storage của Qdrant sẽ **xoá vector** — cẩn thận.
 - SQLite WAL có thể tạo `app.db-wal`, `app.db-shm`; backup cả bộ hoặc dùng `sqlite3 .backup`.
 
 ## Test
@@ -157,7 +156,7 @@ python -m app.eval --reindex --out eval_report  # cần LM Studio/API + Qdrant
 
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 |---|---|---|
-| `Connection refused` Qdrant | Qdrant chưa chạy | `docker compose up -d`, `docker compose ps` |
+| `Connection refused` Qdrant | Qdrant chưa chạy | Khởi động service Qdrant (`systemctl status qdrant` hoặc tương đương) |
 | `Connection refused` cổng `1234` | LM Studio server chưa chạy | Tab Developer → Start Server, hoặc `lms server start` |
 | `model ... not found` | Chưa tải/nạp model hoặc sai identifier | Kiểm tra `curl http://localhost:1234/v1/models`, chỉnh `LLM_MODEL`/`EMBEDDING_MODEL` |
 | `Connection refused` cổng `11434` | (Nếu dùng Ollama) Ollama chưa chạy | Chạy `ollama serve` |
@@ -169,7 +168,7 @@ python -m app.eval --reindex --out eval_report  # cần LM Studio/API + Qdrant
 | Upload lâu | Xử lý đồng bộ | Giảm file/trang; xem terminal |
 | `database is locked` | Nhiều thao tác đồng thời | Thử lại; tránh nhiều tab cùng upload |
 | Port 8501 bận | App khác đang chạy | `streamlit run ... --server.port 8502` |
-| Port 6333 bận | Qdrant khác đang chạy | Đổi mapping/container |
+| Port 6333 bận | Qdrant khác đang chạy | Đổi cổng trong cấu hình Qdrant và `QDRANT_URL` |
 | Chat im lặng | LLM timeout/key | Xem terminal; kiểm tra model |
 | Câu trả lời bịa | Model yếu/không theo prompt | Đổi model; giảm `TOP_K`; kiểm tra nguồn |
 | Nguồn rỗng | Không hit/ngưỡng cao | Hạ `SCORE_THRESHOLD`, kiểm tra PDF có text |

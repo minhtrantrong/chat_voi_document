@@ -22,7 +22,7 @@ description: Thực thi một test case trình duyệt (ST/UI/SEC/PF/EV/REG) tro
 - Nếu chạy retest: đọc `test_reports/<ID>/report.md` cũ và bảng bug. Đổi tên thư mục cũ thành `test_reports/<ID>/_run-<ngày cũ>/` trước khi ghi lần chạy mới (hỏi người dùng nếu họ muốn ghi đè).
 
 ### 2. Kiểm tra môi trường (không đạt thì dừng, không đoán)
-- Qdrant: `curl -s http://localhost:6333/healthz` (hoặc `docker compose ps`).
+- Qdrant: `curl -s http://localhost:6333/healthz`.
 - App: `curl -s -o /dev/null -w "%{http_code}" http://localhost:8501/` phải trả về 200.
 - LLM/Embedding endpoint phản hồi (cần cho ST-03…05, EV, PF-02).
 - Fixtures cần dùng có trong `tests/eval/fixtures/`. Kiểm tra thuộc tính mà test case dựa vào (số trang, dung lượng, có text hay không), ví dụ bằng PyMuPDF. Fixture sai thì ghi sai lệch + bug dữ liệu test (tham khảo BUG-ST01-01).

@@ -7,6 +7,7 @@ from app.ui import (
     empty_state_message,
     format_bytes,
     has_ready_documents,
+    ingest_stage_text,
     source_to_dict,
     status_text,
 )
@@ -55,3 +56,18 @@ def test_source_to_dict_and_dedupe():
     assert item["label"] == "S1"
     assert item["page"] == 1
     assert dedupe_sources([item, item, {**item, "label": "S2"}]) == [item]
+
+
+def test_ingest_stage_text_processing_has_percent() -> None:
+    text = ingest_stage_text("a.pdf", "extracting", 15)
+    assert "⏳" in text and "Đang đọc văn bản" in text and "(15%)" in text
+
+
+def test_ingest_stage_text_pending_and_done_have_no_percent() -> None:
+    assert "%" not in ingest_stage_text("a.pdf", "pending", 0)
+    done = ingest_stage_text("a.pdf", "done", 100)
+    assert "✅" in done and "%" not in done
+
+
+def test_ingest_stage_text_unknown_stage_falls_back() -> None:
+    assert "Đang xử lý" in ingest_stage_text("a.pdf", "xyz")

@@ -33,6 +33,7 @@ from app.ui import (
     empty_state_message,
     format_bytes,
     has_ready_documents,
+    ingest_stage_text,
     md_escape,
     render_sources,
     source_to_dict,
@@ -95,7 +96,7 @@ def _render_sidebar(docs: list[Document], qdrant_ok: bool) -> None:
         st.header("Tài liệu")
         settings = get_settings()
         if not qdrant_ok:
-            st.warning("Qdrant chưa sẵn sàng. Chạy `docker compose up -d` rồi tải lại trang.")
+            st.warning("Qdrant chưa sẵn sàng. Hãy khởi động dịch vụ Qdrant rồi tải lại trang.")
 
         uploaded = st.file_uploader(
             "Tải PDF",
@@ -108,10 +109,19 @@ def _render_sidebar(docs: list[Document], qdrant_ok: bool) -> None:
         if uploaded:
             with st.status(f"Đang xử lý {len(uploaded)} tệp…", expanded=True) as status:
                 bar = st.progress(0)
+                lines = {}
+                for index, item in enumerate(uploaded):
+                    lines[index] = st.empty()
+                    lines[index].markdown(ingest_stage_text(item.name, "pending"))
+                queue = iter(range(len(uploaded)))
 
-                def progress_factory(_name: str):
-                    def update(_stage: str, percent: int) -> None:
-                        bar.progress(max(0, min(100, int(percent))))
+                def progress_factory(name: str):
+                    line = lines[next(queue)]
+
+                    def update(stage: str, percent: int) -> None:
+                        percent = max(0, min(100, int(percent)))
+                        bar.progress(percent)
+                        line.markdown(ingest_stage_text(name, stage, percent))
 
                     return update
 
