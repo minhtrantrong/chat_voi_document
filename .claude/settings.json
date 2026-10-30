@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/block_rm_rf.py",
+            "command": "python .claude/hooks/block-remove-item-recurse.py",
             "timeout": 30
           }
         ]
