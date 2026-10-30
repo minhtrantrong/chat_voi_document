@@ -1,96 +1,105 @@
 #!/usr/bin/env python3
-"""Hook chặn Claude Code xóa toàn bộ file/thư mục con của bất kỳ thư mục nào trong repo (Windows)."""
+"""Hook chặn Claude Code xóa đệ quy file/thư mục con trong repo (Windows, Bash + PowerShell).
+
+Chặn bằng exit code 2 (Claude Code chỉ coi exit 2 là "block"; exit 1 chỉ là lỗi không chặn).
+"""
 
 import json
-import sys
-import re
 import os
+import re
+import shlex
+import sys
+
+REPO_ROOT = os.path.normcase(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+SHELL_TOOLS = {"Bash", "PowerShell"}
+DELETE_VERBS = {"remove-item", "rm", "ri", "del", "erase", "rd", "rmdir"}
+CMD_VERBS = {"del", "erase", "rd", "rmdir"}
 
 
-REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+def split_segments(command: str):
+    """Tách lệnh ghép (; && || |) để mỗi đoạn được kiểm tra riêng."""
+    return [s.strip() for s in re.split(r"&&|\|\||[;|\n]", command) if s.strip()]
 
 
-def is_repo_path(path: str) -> bool:
+def tokenize(segment: str):
+    try:
+        tokens = shlex.split(segment, posix=False)  # posix=False giữ nguyên dấu \ của Windows
+    except ValueError:
+        tokens = segment.split()
+    return [t.strip("\"'") for t in tokens]
+
+
+def is_recursive_flag(token: str, verb: str) -> bool:
+    t = token.lower()
+    if verb in CMD_VERBS:
+        return t in ("/s", "/q")
+    if t in ("--recursive", "--force"):
+        return t == "--recursive"
+    if re.fullmatch(r"-[a-z]*r[a-z]*", t) and len(t) <= 5:  # -r, -R, -rf, -fr, -rfv
+        return True
+    # PowerShell: -Recurse hoặc tiền tố viết tắt (-r, -re, -rec, ...)
+    return t.startswith("-") and len(t) > 1 and "recurse".startswith(t[1:])
+
+
+def is_in_repo(path: str, cwd: str) -> bool:
     if not path:
         return False
+    path = os.path.expandvars(os.path.expanduser(path))
+    if not os.path.isabs(path):
+        path = os.path.join(cwd, path)
     try:
-        abs_path = os.path.realpath(os.path.abspath(path))
+        abs_path = os.path.normcase(os.path.realpath(os.path.abspath(path)))
     except Exception:
         return False
     return abs_path == REPO_ROOT or abs_path.startswith(REPO_ROOT + os.sep)
 
 
-def extract_targets(command: str):
-    targets = []
-    # Trích xuất chuỗi trong ngoặc kép (đường dẫn có khoảng trắng)
-    for m in re.finditer(r'"([^"]*)"', command):
-        token = m.group(1).strip()
-        if token:
-            targets.append(token)
-    # Trích xuất đường dẫn không ngoặc (có :, \, /)
-    for m in re.finditer(r"[A-Za-z]:[\\/][^\s&|<>]*|[\\/](?:[^\s&|<>]+[\\/]?)+", command):
-        token = m.group(0).strip("\"'")
-        if token:
-            targets.append(token)
-    return targets
+def check_segment(segment: str, cwd: str):
+    """Trả về (bị_chặn, lý_do)."""
+    tokens = tokenize(segment)
+    verb_idx = next((i for i, t in enumerate(tokens) if t.lower() in DELETE_VERBS), None)
+    if verb_idx is None:
+        return False, ""
+    verb = tokens[verb_idx].lower()
+    args = tokens[verb_idx + 1 :]
 
+    if not any(is_recursive_flag(a, verb) for a in args):
+        return False, ""
 
-def is_destructive(command: str) -> bool:
-    normalized = re.sub(r"\s+", " ", command.strip()).lower()
+    flag_like = (lambda a: re.fullmatch(r"/[a-zA-Z]", a)) if verb in CMD_VERBS else (lambda a: False)
+    paths = [a for a in args if not a.startswith("-") and not flag_like(a)]
 
-    destructive_patterns = [
-        # PowerShell Remove-Item / alias rm with -Recurse (-r or -Recurse), including combined flags like -rf, -fr
-        r"\b(remove-item|rm)\b.*-\s*[a-z]*r[a-z]*(?:ecurse)?\b",
-        r"\b(remove-item|rm)\b.*-force\b.*-\s*[a-z]*r[a-z]*(?:ecurse)?\b",
-        r"\b(remove-item|rm)\b.*-\s*[a-z]*r[a-z]*(?:ecurse)?\b.*-force\b",
-        # wildcard recursion
-        r"\*\s*-\s*r(?:ecurse)?\b",
-        # cmd rd / rmdir with /s
-        r"\b(rd|rmdir)\b.*(/s|/recurse)\b",
-        # cmd del / erase with /s
-        r"\b(del|erase)\b.*(/s|/q)\b",
-    ]
-
-    return any(re.search(p, normalized) for p in destructive_patterns)
+    if not paths:
+        return True, "Lệnh xóa đệ quy không chỉ rõ mục tiêu."
+    if any(is_in_repo(p, cwd) for p in paths):
+        return True, "Lệnh xóa đệ quy trong repo bị chặn để bảo vệ dữ liệu."
+    return False, ""
 
 
 def main() -> int:
+    sys.stderr.reconfigure(encoding="utf-8")  # tiếng Việt không bị lỗi mã hóa trên console Windows
     try:
         payload = json.load(sys.stdin)
     except Exception:
         return 0
 
-    tool = payload.get("tool")
-    tool_input = payload.get("tool_input") or {}
-    command = tool_input.get("command", "")
-
-    if tool != "Bash" or not isinstance(command, str) or not command.strip():
+    if payload.get("tool_name") not in SHELL_TOOLS:
+        return 0
+    command = (payload.get("tool_input") or {}).get("command", "")
+    if not isinstance(command, str) or not command.strip():
         return 0
 
-    if not is_destructive(command):
-        return 0
-
-    targets = extract_targets(command)
-
-    # Có chỉ rõ đường dẫn mục tiêu
-    if targets:
-        if any(is_repo_path(t) for t in targets):
+    cwd = payload.get("cwd") or os.getcwd()
+    for segment in split_segments(command):
+        blocked, reason = check_segment(segment, cwd)
+        if blocked:
             sys.stderr.write(
-                "\n[HOOK BLOCKED] Lệnh xóa đệ quy trong repo bị chặn để bảo vệ dữ liệu.\n"
-                f"Lệnh: {command}\n"
+                f"\n[HOOK BLOCKED] {reason}\nLệnh: {command}\n"
                 "Vui lòng xóa từng file cụ thể thay vì xóa toàn bộ thư mục con trong repo.\n"
             )
-            return 1
-        # Đường dẫn nằm ngoài repo -> cho phép
-        return 0
-
-    # Không chỉ rõ đường dẫn (xóa toàn bộ / thư mục hiện tại / wildcard) -> chặn để an toàn
-    normalized_cmd = re.sub(r"\s+", " ", command.strip())
-    sys.stderr.write(
-        "\n[HOOK BLOCKED] Lệnh xóa đệ quy không chỉ rõ mục tiêu bị chặn.\n"
-        f"Lệnh: {normalized_cmd}\n"
-    )
-    return 1
+            return 2
+    return 0
 
 
 if __name__ == "__main__":
